@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+#
+# Adjust brightness of screen in fedora linux (tested on fc20)
+#
+# Example:
+# bright 10  # full brightness
+# bright -   # decrease brightness
+# bright +   # increase brightness
+# bright 6   # brightness equal to 6 (range: 0 to 10)
+# bright 0   # no brightness
+
+bri_file="/sys/class/backlight/acpi_video0/brightness"
+
+case $# in
+1|2) case $1 in
+	+) op='+';;
+	-) op='-';;
+	[0-9]|10) op='@';;
+        *) exit 1;;
+     esac;;
+*) echo "Usage: bright [+-], bright [0-10] "
+esac
+
+function change_bri {
+    n=$(cat $bri_file)
+    if [ $1 == '+' ]; then
+	[[ $n -lt 10 ]] &&((n++))
+    else
+	[[ $n -gt 0 ]] &&((n--))
+    fi
+	echo $n
+}
+case $op in
+@) echo $1 > $bri_file ;;
++) echo $(change_bri '+') > $bri_file ;;
+-) echo $(change_bri '-') > $bri_file ;;
+esac
